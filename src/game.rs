@@ -178,8 +178,9 @@ impl Display for Ball {
     }
 }
 
+#[cfg(test)]
 mod tests {
-    
+    use super::*; 
 
     #[test]
     fn glass_empty() {
