@@ -79,6 +79,10 @@ impl Game {
             target.push(ball).unwrap();
         }
     }
+
+    pub fn is_completed(&self) -> bool {
+        return self.glasses.iter().all(|glass| glass.is_completed());
+    }
 }
 
 pub struct Glass {
