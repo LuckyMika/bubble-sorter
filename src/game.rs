@@ -128,6 +128,10 @@ impl Glass {
     pub fn get_available_space(&self) -> u8 {
         return self.size - self.balls.len() as u8;
     }
+
+    pub fn is_completed(&self) -> bool {
+        return self.is_full() && self.balls.iter().all(|ball| ball == self.balls.last().unwrap());
+    }
 }
 
 impl Display for Glass {
@@ -184,28 +188,40 @@ mod tests {
 
     #[test]
     fn glass_empty() {
-        let mut glass = Glass { size: 4, balls: vec![] };
+        let glass = Glass { size: 4, balls: vec![] };
 
         assert_eq!(0, glass.balls.len());
         assert_eq!(true, glass.is_empty());
         assert_eq!(false, glass.is_full());
-
-        assert!(glass.pop().is_err());
-        assert!(glass.push(Ball::RED).is_ok());
     }
 
     #[test]
     fn glass_full() {
-        let mut glass = Glass { size: 4, balls: vec![Ball::RED, Ball::RED, Ball::RED, Ball::RED] };
+        let glass = Glass { size: 4, balls: vec![Ball::RED, Ball::RED, Ball::RED, Ball::RED] };
 
         assert_eq!(4, glass.balls.len());
         assert_eq!(false, glass.is_empty());
         assert_eq!(true, glass.is_full());
-
-        assert!(glass.push(Ball::RED).is_err());
-        assert!(glass.pop().is_ok());
     }
 
+    #[test]
+    fn glass_push() {
+        let mut glass_full = Glass { size: 4, balls: vec![Ball::RED, Ball::RED, Ball::RED, Ball::RED] };
+        let mut glass_empty = Glass { size: 4, balls: vec![] };
+
+        assert!(glass_full.push(Ball::RED).is_err());
+        assert!(glass_empty.push(Ball::RED).is_ok());
+    }
+
+    #[test]
+    fn glass_pop() {
+        let mut glass_full = Glass { size: 4, balls: vec![Ball::RED, Ball::RED, Ball::RED, Ball::RED] };
+        let mut glass_empty = Glass { size: 4, balls: vec![] };
+
+        assert!(glass_full.pop().is_ok());
+        assert!(glass_empty.pop().is_err());
+    }
+    
     #[test]
     fn glass_top() {
         let glass_full = Glass { size: 4, balls: vec![Ball::RED, Ball::RED, Ball::RED, Ball::RED] };
@@ -215,6 +231,17 @@ mod tests {
 
         assert!(glass_full.get_top().is_some());
         assert!(*glass_full.get_top().unwrap() == Ball::RED);
+    }
+
+    #[test]
+    fn glass_completed() {
+        let glass_full = Glass { size: 4, balls: vec![Ball::RED, Ball::RED, Ball::RED, Ball::RED] };
+        let glass_empty = Glass { size: 4, balls: vec![] };
+        let glass_full_2 = Glass { size: 4, balls: vec![Ball::RED, Ball::RED, Ball::RED, Ball::GREEN] };
+
+        assert!(glass_full.is_completed());
+        assert!(!glass_empty.is_completed());
+        assert!(!glass_full_2.is_completed());
     }
 
     #[test]
