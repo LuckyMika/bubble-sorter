@@ -1,4 +1,4 @@
-use std::fmt::{Write, Display};
+use std::fmt::Display;
 
 pub struct Game {
     glasses: Vec<Glass>,
