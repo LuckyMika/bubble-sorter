@@ -1,4 +1,6 @@
-use std::fmt::Display;
+use std::{fmt::Display, cmp::min, cmp::max};
+
+use rand::{thread_rng, seq::SliceRandom};
 
 pub struct Game {
     glasses: Vec<Glass>,
@@ -6,6 +8,43 @@ pub struct Game {
 }
 
 impl Game {
+    pub fn new(glasses: Vec<Glass>) -> Self {
+        Self {
+            glasses,
+            selected: None,
+        }
+    }
+
+    pub fn create(glass_size: u8, glass_count: u8) -> Self {
+        let colors = Ball::get_colors();
+        let mut balls = vec![];
+        
+        let glass_size = max(4, glass_size);
+
+        for color in &colors[0..min(glass_count - 2, colors.len() as u8) as usize] {
+            for _ in 0..glass_size {
+                balls.push(*color);
+            }
+        }
+        
+        let mut rng = thread_rng();
+        balls.shuffle(&mut rng);
+
+        let mut glasses = vec![];
+
+        for chunk in balls.chunks(glass_size as usize) {
+            glasses.push(Glass {
+                size: glass_size,
+                balls: chunk.to_vec(),
+            })
+        }
+
+        glasses.push(Glass { size: glass_size, balls: vec![] });
+        glasses.push(Glass { size: glass_size, balls: vec![] });
+
+        return Self::new(glasses);
+    }
+    
     pub fn is_swap_possible(&self, target: u8) -> Result<(), String> {
         if self.selected.is_none() {
             return Err("No Glass selected".to_owned());
@@ -89,6 +128,17 @@ impl Game {
     }
 }
 
+impl Display for Game {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for glass in &self.glasses {
+            write!(f, "{}\n", glass)?;
+        };
+
+        Ok(())
+    }
+}
+
+#[derive(Clone)]
 pub struct Glass {
     size: u8,
     balls: Vec<Ball>,
@@ -153,13 +203,13 @@ impl Display for Glass {
             write!(f, "\n")?;
         }
 
-        write!(f, "\\_/")?;
+        write!(f, "\\_/\n")?;
 
         Ok(())
     }
 }
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Clone, Copy)]
 pub enum Ball {
     RED,
     GREEN,
@@ -170,6 +220,22 @@ pub enum Ball {
     PINK,
     ORANGE,
     SHITTYCOLORIDK,
+}
+
+impl Ball {
+    pub fn get_colors() -> [Ball; 9] {
+        return [
+            Self::RED,
+            Self::GREEN,
+            Self::BLUE,
+            Self::YELLOW,
+            Self::MAGENTA,
+            Self::CYAN,
+            Self::PINK,
+            Self::ORANGE,
+            Self::SHITTYCOLORIDK,
+        ]
+    }
 }
 
 impl Display for Ball {

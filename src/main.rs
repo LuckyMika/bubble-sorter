@@ -2,8 +2,8 @@ pub mod game;
 use crate::game::*;
 
 fn main() {
-    let glass = Glass::new(4, vec![Ball::GREEN, Ball::RED]);
+    let game = Game::create(8, 8);
 
-    println!("{}", glass);
+    println!("{}", game);
 }
 
