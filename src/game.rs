@@ -11,6 +11,10 @@ impl Game {
             return Err("No Glass selected".to_owned());
         }
 
+        if self.selected.unwrap() == target {
+            return Err("Cannot swap into same glass".to_owned());
+        }
+
         let selected = self.glasses.get(self.selected.unwrap() as usize);
         let target = self.glasses.get(target as usize);
 
@@ -29,7 +33,7 @@ impl Game {
             return Err("Target Glass is full".to_owned());
         }
 
-        if selected.get_top().unwrap() != target.get_top().unwrap() {
+        if target.get_top().is_some() && selected.get_top().unwrap() != target.get_top().unwrap() {
             return Err("Mismatched balls in glasses".to_owned());
         }
 
@@ -253,7 +257,7 @@ mod tests {
         let glass_full = Glass { size: 4, balls: vec![Ball::RED, Ball::RED, Ball::RED, Ball::RED] };
         let glass_empty = Glass { size: 4, balls: vec![] };
 
-        let mut game = Game { glasses: vec![glass_empty, glass_full], selected: None };
+        let mut game = Game { glasses: vec![glass_full, glass_empty], selected: None };
 
         game.select_glass(0);
 
@@ -261,5 +265,33 @@ mod tests {
 
         assert!(game.glasses.get(0).unwrap().is_empty());
         assert!(game.glasses.get(1).unwrap().is_full());
+    }
+
+    #[test]
+    fn swap_empty_to_full() {
+        let glass_full = Glass { size: 4, balls: vec![Ball::RED, Ball::RED, Ball::RED, Ball::RED] };
+        let glass_empty = Glass { size: 4, balls: vec![] };
+
+        let mut game = Game { glasses: vec![glass_full, glass_empty], selected: None };
+
+        game.select_glass(1);
+
+        game.swap_glasses(0);
+
+        assert!(game.glasses.get(1).unwrap().is_empty());
+        assert!(game.glasses.get(0).unwrap().is_full());
+    }
+
+    #[test]
+    fn swap_same_glass() {
+        let glass = Glass { size: 4, balls: vec![Ball::RED, Ball::RED, Ball::RED, Ball::RED] };
+
+        let mut game = Game { glasses: vec![glass], selected: None };
+
+        game.select_glass(0);
+
+        game.swap_glasses(0);
+
+        assert!(game.glasses.get(0).unwrap().is_full());
     }
 }
